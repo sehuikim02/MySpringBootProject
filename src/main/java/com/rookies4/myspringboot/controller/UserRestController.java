@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RestController // @Controller + @ResponseBody
 @RequiredArgsConstructor    // lombok에서 final로 선언된 변수들을 초기화 하는 생성자를 자동으로 만들어줌
-@RequestMapping("/api/users")
+@RequestMapping("/api/users1")      // url path가 중복되면 안됨
 public class UserRestController {
     // @AutoWired   // Setter Injection
     private final UserRepository userRepository;
