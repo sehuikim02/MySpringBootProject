@@ -1,6 +1,11 @@
-### Spring Boot와 JPA (Java Persistence API) 활용
+### [실습 2-4] Spring Boot와 JPA(Java Persistence API) 활용
 
-* Service 계층 추가
-* DTO (Data Transfer Object)를 REST API의 입출력에 사용
-* Controller => Service => Repository
-* User Entity
+* Student와 StudentDetail 1:1 (OneToOne) entity 연관관계
+    * FetchType.LAZY vs FetchType.EAGER
+    * @JoinColumn, mappedBy
+    * 연관관계의 주인 (owner와 종속 (non-owner))
+        * Owner (BookDetail), Non-Owner(Book)
+* DTO (Data Transfer Object)
+* Service
+* Controller
+* Repository
