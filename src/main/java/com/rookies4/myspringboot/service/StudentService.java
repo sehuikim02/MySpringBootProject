@@ -7,6 +7,7 @@ import com.rookies4.myspringboot.exception.BusinessException;
 import com.rookies4.myspringboot.repository.StudentDetailRepository;
 import com.rookies4.myspringboot.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,24 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class StudentService {
-
     private final StudentRepository studentRepository;
     private final StudentDetailRepository studentDetailRepository;
 
     public List<StudentDTO.Response> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
-                // Student => StudentDTO.Response
-                // .map(student -> StudentDTO.Response.fromEntity(student))
+                //Student => StudentDTO.Response
+                //.map(student -> StudentDTO.Response.fromEntity(student))
                 .map(StudentDTO.Response::fromEntity)
-                // .collect(Collectors.toList());
                 .toList();
+        //.collect(Collectors.toList());
     }
 
     public StudentDTO.Response getStudentById(Long id) {
@@ -49,54 +47,53 @@ public class StudentService {
 
     @Transactional
     public StudentDTO.Response createStudent(StudentDTO.Request request) {
-        // Validate StudentEntity number is not already in use
+        // Validate student number is not already in use
         if (studentRepository.existsByStudentNumber(request.getStudentNumber())) {
-            throw new BusinessException("Student already exists with StudentEntity number: "
+            throw new BusinessException("Student already exists with student number: "
                     + request.getStudentNumber(),
                     HttpStatus.CONFLICT);
         }
-        
+
         // Validate email is not already in use (if provided)
-        if (request.getDetailRequest() != null && 
-            request.getDetailRequest().getEmail() != null && 
-            !request.getDetailRequest().getEmail().isEmpty() && 
-            studentDetailRepository.existsByEmail(request.getDetailRequest().getEmail())) {
+        if (request.getDetailRequest() != null &&
+                request.getDetailRequest().getEmail() != null &&
+                !request.getDetailRequest().getEmail().isEmpty() &&
+                studentDetailRepository.existsByEmail(request.getDetailRequest().getEmail())) {
             throw new BusinessException("Student detail already exists with email: "
                     + request.getDetailRequest().getEmail(),
                     HttpStatus.CONFLICT);
         }
 
         // Validate phone number is not already in use
-        if (request.getDetailRequest() != null && 
-            studentDetailRepository.existsByPhoneNumber(request.getDetailRequest().getPhoneNumber())) {
+        if (request.getDetailRequest() != null &&
+                studentDetailRepository.existsByPhoneNumber(request.getDetailRequest().getPhoneNumber())) {
             throw new BusinessException("Student detail already exists with phone number: "
                     + request.getDetailRequest().getPhoneNumber(),
                     HttpStatus.CONFLICT);
         }
 
-        // Create StudentEntity entity
-        Student StudentEntity = Student.builder()
+        // Create student entity
+        Student studentEntity = Student.builder()
                 .name(request.getName())
                 .studentNumber(request.getStudentNumber())
                 .build();
-        
-        // Create StudentEntity detail if provided
+
+        // Create student detail if provided
         if (request.getDetailRequest() != null) {
             StudentDetail studentDetailEntity = StudentDetail.builder()
                     .address(request.getDetailRequest().getAddress())
                     .phoneNumber(request.getDetailRequest().getPhoneNumber())
                     .email(request.getDetailRequest().getEmail())
                     .dateOfBirth(request.getDetailRequest().getDateOfBirth())
-                    // 양방향 연관관계 - StudentDetail에게 Student 객체의 레퍼런스를 알려주기
-                    .student(StudentEntity)
+                    //양방향 연관관계 - StudentDetail에게 Student 객체의 레퍼런스 알려주기
+                    .student(studentEntity)
                     .build();
-
-            // 양방향 연관관계 - Student에게 StudentDetail 객체의 레퍼런스를 알려주기
-            StudentEntity.setStudentDetail(studentDetailEntity);
+            //양방향 연관관계 - Student에게 StudentDetail 객체의 레퍼런스 알려주기
+            studentEntity.setStudentDetail(studentDetailEntity);
         }
 
-        // Save and return the StudentEntity
-        Student savedStudent = studentRepository.save(StudentEntity);   // cascade라 Detail도 같이 저장됨
+        // Save and return the student
+        Student savedStudent = studentRepository.save(studentEntity);
         return StudentDTO.Response.fromEntity(savedStudent);
     }
 
@@ -108,7 +105,7 @@ public class StudentService {
                         + id, HttpStatus.NOT_FOUND));
 
         // Check if another student already has the student number
-        if (!student.getStudentNumber().equals(request.getStudentNumber()) && 
+        if (!student.getStudentNumber().equals(request.getStudentNumber()) &&
                 studentRepository.existsByStudentNumber(request.getStudentNumber())) {
             throw new BusinessException("Student already exists with student number: "
                     + request.getStudentNumber(),
@@ -118,37 +115,47 @@ public class StudentService {
         // Update student basic info
         student.setName(request.getName());
         student.setStudentNumber(request.getStudentNumber());
-        
+
         // Update student detail if provided
         if (request.getDetailRequest() != null) {
             StudentDetail studentDetail = student.getStudentDetail();
-            
+
             // Create new detail if not exists
+            // 등록할때 Student만 등록하고, StudentDetail을 등록하지 않은 경우의 Update
             if (studentDetail == null) {
+                //StudentDetail 엔티티를 생성
                 studentDetail = new StudentDetail();
-                // 양방향 연관관계 설정
+                //수정하기 위해 입력받은 address로 StudentDetail 엔티티에 set 하기
+                studentDetail.setAddress(request.getDetailRequest().getAddress());
+                //수정하기 위해 입력받은 phoneNumber로 StudentDetail 엔티티에 set 하기
+                studentDetail.setPhoneNumber(request.getDetailRequest().getPhoneNumber());
+                //수정하기 위해 입력받은 email로 StudentDetail 엔티티에 set 하기
+                studentDetail.setEmail(request.getDetailRequest().getEmail());
+                //수정하기 위해 입력받은 dateOfBirth로 StudentDetail 엔티티에 set 하기
+                studentDetail.setDateOfBirth(request.getDetailRequest().getDateOfBirth());
+                //양방향 연관관계 설정
                 studentDetail.setStudent(student);
                 student.setStudentDetail(studentDetail);
             }
-            
+
             // Validate email is not already in use (if changing)
-            if (request.getDetailRequest().getEmail() != null && 
-                !request.getDetailRequest().getEmail().isEmpty() &&
-                (studentDetail.getEmail() == null || !studentDetail.getEmail().equals(request.getDetailRequest().getEmail())) &&
-                studentDetailRepository.existsByEmail(request.getDetailRequest().getEmail())) {
+            if (request.getDetailRequest().getEmail() != null &&
+                    !request.getDetailRequest().getEmail().isEmpty() &&
+                    (studentDetail.getEmail() == null || !studentDetail.getEmail().equals(request.getDetailRequest().getEmail())) &&
+                    studentDetailRepository.existsByEmail(request.getDetailRequest().getEmail())) {
                 throw new BusinessException("Student detail already exists with email: "
                         + request.getDetailRequest().getEmail(),
                         HttpStatus.CONFLICT);
             }
-            
+
             // Validate phone number is not already in use (if changing)
             if ((studentDetail.getPhoneNumber() == null || !studentDetail.getPhoneNumber().equals(request.getDetailRequest().getPhoneNumber())) &&
-                studentDetailRepository.existsByPhoneNumber(request.getDetailRequest().getPhoneNumber())) {
+                    studentDetailRepository.existsByPhoneNumber(request.getDetailRequest().getPhoneNumber())) {
                 throw new BusinessException("Student detail already exists with phone number: "
                         + request.getDetailRequest().getPhoneNumber(),
                         HttpStatus.CONFLICT);
             }
-            
+
             // Update detail fields
             studentDetail.setAddress(request.getDetailRequest().getAddress());
             studentDetail.setPhoneNumber(request.getDetailRequest().getPhoneNumber());
