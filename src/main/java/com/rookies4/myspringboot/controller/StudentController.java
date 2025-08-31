@@ -1,5 +1,4 @@
 package com.rookies4.myspringboot.controller;
-
 import com.rookies4.myspringboot.controller.dto.StudentDTO;
 import com.rookies4.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//StudentController 클래스
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
