@@ -79,7 +79,7 @@ public class JwtService {
 
         return Jwts.builder() //JwtBuilder
                 .signWith(KEY, ALGORITHM) // Secret 값과 알고리즘의 종류 설정
-                .subject(userName) // payload의 claim 생성
+                .subject(userName) // payload의 subject claim 생성
                 .issuedAt(new Date()) //생성시간
                 .expiration(exprireDate) //만료시간
                 .compact();

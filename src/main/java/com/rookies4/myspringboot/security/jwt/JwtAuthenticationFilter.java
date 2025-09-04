@@ -29,6 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
+        //Bearer eyJhbGciOiJIUzI1NiJ9.eyJzd
+        //Token 문자열에 포함된 email주소 추출하기
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtService.extractUsername(token);
@@ -41,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(userDetails,
                                 null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                //SecurityContext 객체에 Authentication 객체가 저장됨
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
