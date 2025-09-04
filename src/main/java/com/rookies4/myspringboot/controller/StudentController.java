@@ -1,6 +1,7 @@
 package com.rookies4.myspringboot.controller;
 
 import com.rookies4.myspringboot.controller.dto.StudentDTO;
+import com.rookies4.myspringboot.security.models.CurrentUser;
 import com.rookies4.myspringboot.security.models.UserInfo;
 import com.rookies4.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
@@ -57,7 +58,8 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<StudentDTO.Response> createStudent(
             @Valid @RequestBody StudentDTO.Request request,
-            @AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser) {
+            @CurrentUser UserInfo currentUser) {
+        //@AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser) {
         StudentDTO.Response createdStudent = studentService.createStudent(request, currentUser);
         return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
