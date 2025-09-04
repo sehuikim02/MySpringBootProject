@@ -14,3 +14,6 @@
 * N+1 문제 해결
   * 성능 개선
   * HibernateModule 사용 BatchSize 설정하기
+---
+* Basic Authentication (인증) 과 Authorization (권한)
+* JWT (Json Web Token) 토큰 인증
