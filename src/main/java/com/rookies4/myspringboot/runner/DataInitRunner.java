@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@Order(1)
+@Order(2)
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitRunner implements CommandLineRunner {
@@ -37,7 +37,7 @@ public class DataInitRunner implements CommandLineRunner {
 
         // Create departments
         List<Department> departments = createDepartments();
-        
+
         // Create students
         createStudents(departments);
 
@@ -144,26 +144,25 @@ public class DataInitRunner implements CommandLineRunner {
     }
 
     private Student createStudentWithDetail(String name, String studentNumber, Department department,
-                                         String address, String phoneNumber, String email, LocalDate dateOfBirth) {
-        // StudentDetail
+                                            String address, String phoneNumber, String email, LocalDate dateOfBirth) {
+        //StudentDetail
         StudentDetail detail = StudentDetail.builder()
                 .address(address)
                 .phoneNumber(phoneNumber)
                 .email(email)
                 .dateOfBirth(dateOfBirth)
                 .build();
-
-        // Student
+        //Student
         Student student = Student.builder()
                 .name(name)
                 .studentNumber(studentNumber)
-                // 양방향 연관관계 설정
+                //양방향 연관관계 설정
                 .department(department)
-                // 양방향 연관관계 설정
+                //양방향 연관관계 설정
                 .studentDetail(detail)
                 .build();
 
-        // 양방향 연관관계 설정
+        //양방향 연관관계 설정
         detail.setStudent(student);
         return student;
     }
