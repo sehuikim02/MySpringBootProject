@@ -1,6 +1,7 @@
 package com.rookies4.myspringboot.controller;
 
 import com.rookies4.myspringboot.controller.dto.StudentDTO;
+import com.rookies4.myspringboot.security.models.UserInfo;
 import com.rookies4.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -53,8 +55,10 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<StudentDTO.Response> createStudent(@Valid @RequestBody StudentDTO.Request request) {
-        StudentDTO.Response createdStudent = studentService.createStudent(request);
+    public ResponseEntity<StudentDTO.Response> createStudent(
+            @Valid @RequestBody StudentDTO.Request request,
+            @AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser) {
+        StudentDTO.Response createdStudent = studentService.createStudent(request, currentUser);
         return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
 

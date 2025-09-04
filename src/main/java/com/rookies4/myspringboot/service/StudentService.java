@@ -9,6 +9,7 @@ import com.rookies4.myspringboot.exception.ErrorCode;
 import com.rookies4.myspringboot.repository.DepartmentRepository;
 import com.rookies4.myspringboot.repository.StudentDetailRepository;
 import com.rookies4.myspringboot.repository.StudentRepository;
+import com.rookies4.myspringboot.security.models.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,7 +83,7 @@ public class StudentService {
     }
 
     @Transactional
-    public StudentDTO.Response createStudent(StudentDTO.Request request) {
+    public StudentDTO.Response createStudent(StudentDTO.Request request, UserInfo currentUser) {
         // Validate department exists
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
@@ -111,6 +112,7 @@ public class StudentService {
                 .name(request.getName())
                 .studentNumber(request.getStudentNumber())
                 .department(department)
+                .userInfo(currentUser)
                 .build();
 
         // Create student detail if provided
